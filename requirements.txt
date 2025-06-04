@@ -2,4 +2,3 @@ streamlit
 streamlit-autorefresh
 scikit-learn
 pandas
-request
