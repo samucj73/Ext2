@@ -1,8 +1,11 @@
-
 import requests
+import json
+import os
 
 API_URL = "https://api.casinoscores.com/svc-evolution-game-events/api/xxxtremelightningroulette/latest"
-HEADERS = { "User-Agent": "Mozilla/5.0" }
+HEADERS = {
+    "User-Agent": "Mozilla/5.0"
+}
 
 def fetch_latest_result():
     try:
@@ -15,22 +18,34 @@ def fetch_latest_result():
             lucky_list = result.get("luckyNumbersList", [])
 
             number = outcome.get("number")
+            color = outcome.get("color", "-")
             timestamp = game_data.get("startedAt")
             lucky_numbers = [item["number"] for item in lucky_list]
 
             return {
                 "number": number,
+                "color": color,
                 "timestamp": timestamp,
                 "lucky_numbers": lucky_numbers
             }
     except:
         return None
 
-def salvar_resultado_em_arquivo(resultados, caminho='historico_resultados.txt'):
-    try:
-        with open(caminho, 'a') as f:
-            for r in resultados:
-                linha = f"{r['number']} | {','.join(map(str, r['lucky_numbers']))} | {r['timestamp']}\n"
-                f.write(linha)
-    except Exception as e:
-        print(f"[Erro ao salvar]: {e}")
+# ✅ Função para salvar os resultados em um arquivo JSON (um abaixo do outro)
+def salvar_resultado_em_arquivo(history, caminho="historico_resultados.json"):
+    dados_existentes = []
+
+    # Se já existe o arquivo, lê os dados anteriores
+    if os.path.exists(caminho):
+        with open(caminho, "r") as f:
+            try:
+                dados_existentes = json.load(f)
+            except json.JSONDecodeError:
+                dados_existentes = []
+
+    # Adiciona os novos 10 resultados ao final
+    novos = list(reversed(history))  # reverte para salvar na ordem cronológica
+    dados_existentes.extend(novos)
+
+    with open(caminho, "w") as f:
+        json.dump(dados_existentes, f, indent=2)
