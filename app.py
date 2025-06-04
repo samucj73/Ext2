@@ -56,8 +56,14 @@ with abas[2]:
     previsoes = prever_proximos_numeros(st.session_state.history, qtd=10)
 
     if previsoes:
+        numeros_sorteados = [item["number"] for item in st.session_state.history[:10]]
+
         for i, item in enumerate(previsoes, 1):
-            st.markdown(f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}` | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}` | ⬆⬇ Tipo: `{item['range']}`")
+            texto = f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}` | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}` | ⬆⬇ Tipo: `{item['range']}`"
+            if item['numero'] in numeros_sorteados:
+                st.success(texto)
+            else:
+                st.markdown(texto)
     else:
         st.info("🔄 Aguarde mais dados (mínimo 20 sorteios) para previsão com IA.")
 
