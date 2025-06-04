@@ -1,56 +1,65 @@
-
 import streamlit as st
-import time
-from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
-from analysis import analisar_estatisticas
-from predictor import prever_numeros_provaveis
+from data_handler import fetch_latest_result
+from predictor import prever_proximos_numeros  # <- Import do preditor
+from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
-st.markdown("<h1 style='text-align: center;'>🎰 Monitor de Sorteios - XXXtreme Lightning Roulette</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center;'>🎰 Monitor de Sorteios - XXXtreme Lightning Roulette</h1>", unsafe_allow_html=True)
 
-# Inicializa estados
+# Auto refresh
+st_autorefresh(interval=10_000, key="refresh")
+
+# Estado da sessão
 if "history" not in st.session_state:
     st.session_state.history = []
 if "last_seen_timestamp" not in st.session_state:
     st.session_state.last_seen_timestamp = None
 
-# 🔍 Busca o último resultado
+# Captura novo sorteio
 result = fetch_latest_result()
-
 if result and result["timestamp"] != st.session_state.last_seen_timestamp:
     st.session_state.history.insert(0, result)
-    st.session_state.last_seen_timestamp = result["timestamp"]
     st.session_state.history = st.session_state.history[:50]
+    st.session_state.last_seen_timestamp = result["timestamp"]
 
-    # Salva a cada 10 sorteios
-    if len(st.session_state.history) % 10 == 0:
-        salvar_resultado_em_arquivo(st.session_state.history[:10])
+# --- TABS ---
+abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"])
 
-# 🎯 Mostra números em tempo real
-st.subheader("🎲 Números Sorteados ao Vivo:", divider='rainbow')
-if st.session_state.history:
-    for item in st.session_state.history[:10]:
-        st.write(f"🎯 Número: {item['number']} | ⚡ Lucky: {item['lucky_numbers']} | 🕒 {item['timestamp']}")
-else:
-    st.info("⏳ Aguardando os primeiros números...")
+# 🟠 Aba 1 – Monitoramento
+with abas[0]:
+    st.subheader("🎲 Números Sorteados ao Vivo")
+    if st.session_state.history:
+        for item in st.session_state.history[:10]:
+            st.write(f"🎯 Número: {item['number']} | ⚡ Lucky: {item['lucky_numbers']} | 🕒 {item['timestamp']}")
+    else:
+        st.info("⏳ Aguardando os primeiros números...")
 
-st.markdown(f"<p style='text-align: center;'>📊 Números coletados: <b>{len(st.session_state.history)}</b> / 50</p>", unsafe_allow_html=True)
+    st.markdown(f"📊 Números coletados: **{len(st.session_state.history)}** / 50")
 
-# Botão de análise aparece ao atingir 10
-if len(st.session_state.history) >= 10:
-    st.subheader("📈 Estatísticas dos Últimos 10 Sorteios", divider='rainbow')
-    if st.button("🔍 Analisar os 10 últimos sorteios"):
-        estatisticas = analisar_estatisticas(st.session_state.history[:10])
-        for titulo, valores in estatisticas.items():
-            st.markdown(f"**{titulo}**")
-            for v in valores:
-                st.write("➡️", v)
+# 🟡 Aba 2 – Análise
+with abas[1]:
+    st.subheader("📊 Estatísticas dos Últimos Sorteios")
+    if len(st.session_state.history) >= 10:
+        if st.button("🔍 Analisar"):
+            numeros = [item["number"] for item in st.session_state.history]
+            freq = {n: numeros.count(n) for n in set(numeros)}
+            top_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:10]
 
-        # Previsão
-        st.subheader("🔮 Previsão de Próximos Números Prováveis", divider='rainbow')
-        previsao = prever_numeros_provaveis()
-        st.write("➡️", ', '.join(map(str, previsao)))
+            st.write("🎯 **Top 10 Números Mais Frequentes**:")
+            for n, f in top_freq:
+                st.write(f"➡️ Número {n} saiu {f} vezes")
 
-# Rodapé
-st.markdown("---")
-st.markdown("<p style='text-align: center;'>Desenvolvido por Kanō • Monitor de Roleta XXXtreme 🎰</p>", unsafe_allow_html=True)
+# 🟢 Aba 3 – Previsões Futuras
+with abas[2]:
+    st.subheader("🔮 Previsão dos Próximos Números (IA)")
+
+    previsoes = prever_proximos_numeros(st.session_state.history, qtd=10)
+
+    if previsoes:
+        for i, item in enumerate(previsoes, 1):
+            st.markdown(f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}` | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}` | ⬆⬇ Tipo: `{item['range']}`")
+    else:
+        st.info("🔄 Aguarde mais dados (mínimo 20 sorteios) para previsão com IA.")
+
+# Rodapé padrão
+st.markdown("<hr><p style='text-align:center'>© 2025 - Projeto de Previsão de Roleta com IA</p>", unsafe_allow_html=True)
