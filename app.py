@@ -1,6 +1,6 @@
 import streamlit as st
 from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
-from predictor import prever_proximos_numeros
+from modelo_ia import prever_proximos_numeros_reais  # NOVO IMPORT
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
@@ -52,9 +52,9 @@ with abas[1]:
 
 # 🟢 Aba 3 – Previsões Futuras
 with abas[2]:
-    st.subheader("🔮 Previsão dos Próximos Números (IA)")
+    st.subheader("🔮 Previsão dos Próximos Números (IA Real)")
 
-    previsoes = prever_proximos_numeros(st.session_state.history, qtd=10)
+    previsoes = prever_proximos_numeros_reais(st.session_state.history, qtd=10)  # FUNÇÃO NOVA
 
     if previsoes:
         numeros_sorteados = [item["number"] for item in st.session_state.history[:10]]
