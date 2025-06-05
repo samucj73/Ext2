@@ -10,7 +10,7 @@ st.markdown("<h1 style='text-align:center;'>🎰 Monitor de Sorteios - XXXtreme 
 st_autorefresh(interval=10_000, key="refresh")
 
 # Estado da sessão
-if "history" not in st.session_state:     salvar_resultado_em_arquivo(result)
+if "history" not in st.session_state:salvar_resultado_em_arquivo(result)
     st.session_state.history = []
 if "last_seen_timestamp" not in st.session_state:
     st.session_state.last_seen_timestamp = None
