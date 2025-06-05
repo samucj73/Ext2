@@ -64,7 +64,7 @@ with abas[2]:
                 f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}`"
                 f" | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}`"
                 f" | ⬆⬇ Tipo: `{item['range']}` | 🔚 Terminal: `{item['terminal']}`"
-                f" | ◀️ Vizinho Anterior: `{item['vizinho_anterior']}` | ▶️ Vizinho Posterior: `{item['vizinho_posterior']}`"
+                f" | ◀️ Vizinho Anterior: `{item['vizinho_1']}` | ▶️ Vizinho Posterior: `{item['vizinho_2']}`"
             )
             if item['numero'] in numeros_sorteados:
                 st.success(texto)
