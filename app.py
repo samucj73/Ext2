@@ -1,5 +1,5 @@
 import streamlit as st
-from data_handler import fetch_latest_result
+from from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
 from predictor import prever_proximos_numeros  # <- Import do preditor
 from streamlit_autorefresh import st_autorefresh
 
@@ -10,7 +10,7 @@ st.markdown("<h1 style='text-align:center;'>🎰 Monitor de Sorteios - XXXtreme 
 st_autorefresh(interval=10_000, key="refresh")
 
 # Estado da sessão
-if "history" not in st.session_state:
+if "history" not in st.session_state:     salvar_resultado_em_arquivo(result)
     st.session_state.history = []
 if "last_seen_timestamp" not in st.session_state:
     st.session_state.last_seen_timestamp = None
