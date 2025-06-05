@@ -1,6 +1,6 @@
 import streamlit as st
 from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
-from modelo_ia import prever_proximos_numeros_com_ia  # NOVO IMPORT
+from modelo_ia import prever_proximos_numeros_com_ia  # IA
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
@@ -14,6 +14,8 @@ if "history" not in st.session_state:
     st.session_state.history = []
 if "last_seen_timestamp" not in st.session_state:
     st.session_state.last_seen_timestamp = None
+if "ultima_previsao" not in st.session_state:
+    st.session_state.ultima_previsao = None
 
 # Captura novo sorteio
 result = fetch_latest_result()
@@ -23,12 +25,28 @@ if result and result["timestamp"] != st.session_state.last_seen_timestamp:
     st.session_state.last_seen_timestamp = result["timestamp"]
     salvar_resultado_em_arquivo(result)
 
+    # 🔮 Gera nova previsão automaticamente após novo número
+    previsoes = prever_proximos_numeros_com_ia("resultados.csv", qtd=1)
+    if previsoes:
+        st.session_state.ultima_previsao = previsoes[0]
+
 # --- TABS ---
 abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"])
 
 # 🟠 Aba 1 – Monitoramento
 with abas[0]:
     st.subheader("🎲 Números Sorteados ao Vivo")
+
+    if st.session_state.ultima_previsao:
+        previsao = st.session_state.ultima_previsao
+        st.markdown(f"""
+        <div style='border:2px solid #4CAF50; padding:10px; border-radius:10px; background:#f0fff0'>
+        <h4>🔮 Próximo número provável (IA): <span style='color:darkblue;'>🎯 {previsao['numero']}</span></h4>
+        <p>🎨 Cor: <b>{previsao['cor']}</b> | 📊 Coluna: {previsao['coluna']} | 🧱 Linha: {previsao['linha']} |
+        ⬆⬇ Tipo: {previsao['range']} | 🔚 Terminal: {previsao['terminal']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
     if st.session_state.history:
         for item in st.session_state.history[:10]:
             st.write(f"🎯 Número: {item['number']} | ⚡ Lucky: {item['lucky_numbers']} | 🕒 {item['timestamp']}")
