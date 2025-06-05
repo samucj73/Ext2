@@ -21,7 +21,7 @@ if result and result["timestamp"] != st.session_state.last_seen_timestamp:
     st.session_state.history.insert(0, result)
     st.session_state.history = st.session_state.history[:50]
     st.session_state.last_seen_timestamp = result["timestamp"]
-    salvar_resultado_em_arquivo(result)  # ← Aqui sim é o lugar correto
+    salvar_resultado_em_arquivo(result)
 
 # --- TABS ---
 abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"])
@@ -60,7 +60,12 @@ with abas[2]:
         numeros_sorteados = [item["number"] for item in st.session_state.history[:10]]
 
         for i, item in enumerate(previsoes, 1):
-            texto = f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}` | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}` | ⬆⬇ Tipo: `{item['range']}`"
+            texto = (
+                f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}`"
+                f" | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}`"
+                f" | ⬆⬇ Tipo: `{item['range']}` | 🔚 Terminal: `{item['terminal']}`"
+                f" | ◀️ Vizinho Anterior: `{item['vizinho_anterior']}` | ▶️ Vizinho Posterior: `{item['vizinho_posterior']}`"
+            )
             if item['numero'] in numeros_sorteados:
                 st.success(texto)
             else:
