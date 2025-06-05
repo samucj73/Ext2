@@ -1,5 +1,5 @@
 import streamlit as st
-from from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
+from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
 from predictor import prever_proximos_numeros  # <- Import do preditor
 from streamlit_autorefresh import st_autorefresh
 
