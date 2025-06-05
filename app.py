@@ -1,6 +1,6 @@
 import streamlit as st
 from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
-from modelo_ia import prever_proximos_numeros_reais  # NOVO IMPORT
+from modelo_ia import prever_proximos_numeros_com_ia  # NOVO IMPORT
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
@@ -50,11 +50,11 @@ with abas[1]:
             for n, f in top_freq:
                 st.write(f"➡️ Número {n} saiu {f} vezes")
 
-# 🟢 Aba 3 – Previsões Futuras
+# 🟢 Aba 3 – Previsões Futuras (IA)
 with abas[2]:
-    st.subheader("🔮 Previsão dos Próximos Números (IA Real)")
+    st.subheader("🔮 Previsão dos Próximos Números (IA)")
 
-    previsoes = prever_proximos_numeros_reais(st.session_state.history, qtd=10)  # FUNÇÃO NOVA
+    previsoes = prever_proximos_numeros_com_ia("resultados.csv", qtd=10)
 
     if previsoes:
         numeros_sorteados = [item["number"] for item in st.session_state.history[:10]]
@@ -64,14 +64,14 @@ with abas[2]:
                 f"**#{i}** 🎯 Número: `{item['numero']}` | 🎨 Cor: `{item['cor']}`"
                 f" | 📊 Coluna: `{item['coluna']}` | 🧱 Linha: `{item['linha']}`"
                 f" | ⬆⬇ Tipo: `{item['range']}` | 🔚 Terminal: `{item['terminal']}`"
-                f" | ◀️ Vizinho Anterior: `{item['vizinho_1']}` | ▶️ Vizinho Posterior: `{item['vizinho_2']}`"
+                f" | ◀️ Vizinho Anterior: `{item['vizinho_anterior']}` | ▶️ Vizinho Posterior: `{item['vizinho_posterior']}`"
             )
             if item['numero'] in numeros_sorteados:
                 st.success(texto)
             else:
                 st.markdown(texto)
     else:
-        st.info("🔄 Aguarde mais dados (mínimo 20 sorteios) para previsão com IA.")
+        st.info("🔄 Aguarde mais dados (mínimo 30 sorteios) para previsão com IA.")
 
 # Rodapé padrão
 st.markdown("<hr><p style='text-align:center'>© 2025 - Projeto de Previsão de Roleta com IA</p>", unsafe_allow_html=True)
