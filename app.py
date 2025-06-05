@@ -6,7 +6,7 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
 st.markdown("<h1 style='text-align:center;'>🎰 Monitor de Sorteios - XXXtreme Lightning Roulette</h1>", unsafe_allow_html=True)
 
-# Auto refresh
+# Auto refresh a cada 10 segundos
 st_autorefresh(interval=10_000, key="refresh")
 
 # Estado da sessão
@@ -25,10 +25,10 @@ if result and result["timestamp"] != st.session_state.last_seen_timestamp:
     st.session_state.last_seen_timestamp = result["timestamp"]
     salvar_resultado_em_arquivo(result)
 
-    # 🔮 Gera nova previsão automaticamente após novo número
-    previsoes = prever_proximos_numeros_com_ia("resultados.csv", qtd=1)
-    if previsoes:
-        st.session_state.ultima_previsao = previsoes[0]
+    # Gera previsão imediata
+    previsoes_rapidas = prever_proximos_numeros_com_ia("resultados.csv", qtd=1)
+    if previsoes_rapidas:
+        st.session_state.ultima_previsao = previsoes_rapidas[0]
 
 # --- TABS ---
 abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"])
@@ -37,16 +37,6 @@ abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"
 with abas[0]:
     st.subheader("🎲 Números Sorteados ao Vivo")
 
-    if st.session_state.ultima_previsao:
-        previsao = st.session_state.ultima_previsao
-        st.markdown(f"""
-        <div style='border:2px solid #4CAF50; padding:10px; border-radius:10px; background:#f0fff0'>
-        <h4>🔮 Próximo número provável (IA): <span style='color:darkblue;'>🎯 {previsao['numero']}</span></h4>
-        <p>🎨 Cor: <b>{previsao['cor']}</b> | 📊 Coluna: {previsao['coluna']} | 🧱 Linha: {previsao['linha']} |
-        ⬆⬇ Tipo: {previsao['range']} | 🔚 Terminal: {previsao['terminal']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
     if st.session_state.history:
         for item in st.session_state.history[:10]:
             st.write(f"🎯 Número: {item['number']} | ⚡ Lucky: {item['lucky_numbers']} | 🕒 {item['timestamp']}")
@@ -54,6 +44,15 @@ with abas[0]:
         st.info("⏳ Aguardando os primeiros números...")
 
     st.markdown(f"📊 Números coletados: **{len(st.session_state.history)}** / 50")
+
+    # Exibe previsão IA em tempo real
+    if st.session_state.ultima_previsao:
+        st.markdown("---")
+        st.subheader("🔮 Próximo Número Previsto (IA em tempo real):")
+        prev = st.session_state.ultima_previsao
+        st.markdown(
+            f"🎯 **Número:** `{prev['numero']}` | 🎨 Cor: `{prev['cor']}` | 📊 Coluna: `{prev['coluna']}` | 🧱 Linha: `{prev['linha']}`"
+        )
 
 # 🟡 Aba 2 – Análise
 with abas[1]:
