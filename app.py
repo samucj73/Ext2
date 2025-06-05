@@ -1,6 +1,6 @@
 import streamlit as st
 from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
-from predictor import prever_proximos_numeros  # <- Import do preditor
+from predictor import prever_proximos_numeros
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
@@ -10,7 +10,7 @@ st.markdown("<h1 style='text-align:center;'>🎰 Monitor de Sorteios - XXXtreme 
 st_autorefresh(interval=10_000, key="refresh")
 
 # Estado da sessão
-if "history" not in st.session_state:salvar_resultado_em_arquivo(result)
+if "history" not in st.session_state:
     st.session_state.history = []
 if "last_seen_timestamp" not in st.session_state:
     st.session_state.last_seen_timestamp = None
@@ -21,6 +21,7 @@ if result and result["timestamp"] != st.session_state.last_seen_timestamp:
     st.session_state.history.insert(0, result)
     st.session_state.history = st.session_state.history[:50]
     st.session_state.last_seen_timestamp = result["timestamp"]
+    salvar_resultado_em_arquivo(result)  # ← Aqui sim é o lugar correto
 
 # --- TABS ---
 abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"])
