@@ -1,7 +1,9 @@
 import streamlit as st
 from data_handler import fetch_latest_result, salvar_resultado_em_arquivo
-from modelo_ia import prever_proximos_numeros_com_ia  # IA
+from modelo_ia import prever_proximos_numeros_com_ia
 from streamlit_autorefresh import st_autorefresh
+import pandas as pd
+import os
 
 st.set_page_config(page_title="Monitor XXXtreme", layout="centered")
 st.markdown("<h1 style='text-align:center;'>🎰 Monitor de Sorteios - XXXtreme Lightning Roulette</h1>", unsafe_allow_html=True)
@@ -17,6 +19,15 @@ if "last_seen_timestamp" not in st.session_state:
 if "ultima_previsao" not in st.session_state:
     st.session_state.ultima_previsao = None
 
+# Recuperar histórico do CSV, se vazio
+if not st.session_state.history:
+    if os.path.exists("resultados.csv"):
+        df_hist = pd.read_csv("resultados.csv").dropna()
+        historico_recuperado = df_hist.iloc[-50:][::-1].to_dict("records")
+        st.session_state.history = historico_recuperado
+        if historico_recuperado:
+            st.session_state.last_seen_timestamp = historico_recuperado[0]["timestamp"]
+
 # Captura novo sorteio
 result = fetch_latest_result()
 if result and result["timestamp"] != st.session_state.last_seen_timestamp:
@@ -25,15 +36,15 @@ if result and result["timestamp"] != st.session_state.last_seen_timestamp:
     st.session_state.last_seen_timestamp = result["timestamp"]
     salvar_resultado_em_arquivo(result)
 
-    # Gera previsão imediata
+    # Previsão em tempo real com IA
     previsoes_rapidas = prever_proximos_numeros_com_ia("resultados.csv", qtd=1)
     if previsoes_rapidas:
         st.session_state.ultima_previsao = previsoes_rapidas[0]
 
-# --- TABS ---
+# TABS
 abas = st.tabs(["📡 Monitoramento", "📈 Análise", "🔮 Previsões Futuras"])
 
-# 🟠 Aba 1 – Monitoramento
+# 📡 Aba 1 – Monitoramento
 with abas[0]:
     st.subheader("🎲 Números Sorteados ao Vivo")
 
@@ -45,36 +56,39 @@ with abas[0]:
 
     st.markdown(f"📊 Números coletados: **{len(st.session_state.history)}** / 50")
 
-    # Exibe previsão IA em tempo real
     if st.session_state.ultima_previsao:
         st.markdown("---")
         st.subheader("🔮 Próximo Número Previsto (IA em tempo real):")
         prev = st.session_state.ultima_previsao
         st.markdown(
             f"🎯 **Número:** `{prev['numero']}` | 🎨 Cor: `{prev['cor']}` | 📊 Coluna: `{prev['coluna']}` | 🧱 Linha: `{prev['linha']}`"
+            f" | ⬆⬇ Tipo: `{prev['range']}` | 🔚 Terminal: `{prev['terminal']}`"
         )
 
-# 🟡 Aba 2 – Análise
+# 📈 Aba 2 – Análise
 with abas[1]:
     st.subheader("📊 Estatísticas dos Últimos Sorteios")
+
     if len(st.session_state.history) >= 10:
         if st.button("🔍 Analisar"):
-            numeros = [item["number"] for item in st.session_state.history]
+            numeros = [int(item["number"]) for item in st.session_state.history]
             freq = {n: numeros.count(n) for n in set(numeros)}
-            top_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:1]
+            top_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:10]
 
-            st.write("🎯 **Top 10 Números Mais Frequentes**:")
+            st.write("🎯 **Top 10 Números Mais Frequentes:**")
             for n, f in top_freq:
                 st.write(f"➡️ Número {n} saiu {f} vezes")
+    else:
+        st.info("📉 É necessário pelo menos 10 sorteios para análise.")
 
-# 🟢 Aba 3 – Previsões Futuras (IA)
+# 🔮 Aba 3 – Previsões Futuras
 with abas[2]:
     st.subheader("🔮 Previsão dos Próximos Números (IA)")
 
     previsoes = prever_proximos_numeros_com_ia("resultados.csv", qtd=10)
 
     if previsoes:
-        numeros_sorteados = [item["number"] for item in st.session_state.history[:1]]
+        numeros_sorteados = [int(item["number"]) for item in st.session_state.history[:1]]
 
         for i, item in enumerate(previsoes, 1):
             texto = (
@@ -90,5 +104,5 @@ with abas[2]:
     else:
         st.info("🔄 Aguarde mais dados (mínimo 30 sorteios) para previsão com IA.")
 
-# Rodapé padrão
+# Rodapé
 st.markdown("<hr><p style='text-align:center'>© 2025 - Projeto de Previsão de Roleta com IA</p>", unsafe_allow_html=True)
