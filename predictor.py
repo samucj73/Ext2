@@ -59,7 +59,7 @@ def extrair_features(df):
 
     return df
 
-def prever_proximos_numeros(history, qtd=10):
+def prever_proximos_numeros(history, qtd=1):
     try:
         df = pd.read_csv("resultados.csv")
         df.dropna(inplace=True)
