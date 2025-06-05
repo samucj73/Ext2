@@ -61,7 +61,7 @@ with abas[1]:
         if st.button("🔍 Analisar"):
             numeros = [item["number"] for item in st.session_state.history]
             freq = {n: numeros.count(n) for n in set(numeros)}
-            top_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:10]
+            top_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:1]
 
             st.write("🎯 **Top 10 Números Mais Frequentes**:")
             for n, f in top_freq:
@@ -74,7 +74,7 @@ with abas[2]:
     previsoes = prever_proximos_numeros_com_ia("resultados.csv", qtd=10)
 
     if previsoes:
-        numeros_sorteados = [item["number"] for item in st.session_state.history[:10]]
+        numeros_sorteados = [item["number"] for item in st.session_state.history[:1]]
 
         for i, item in enumerate(previsoes, 1):
             texto = (
